@@ -6,12 +6,12 @@ type HmacSha1 = Hmac<Sha1>;
 
 struct TOTP<'a> {
     secret: &'a [u8],
-    // TODO: maybe enforce the structure of this with types
     modulo: u32,
     time_step: u64,
 }
 
 impl<'a> TOTP<'a> {
+    /// Initialize TOTP struct
     fn new(secret: &'a [u8], modulo: u32, time_step: u64) -> Self {
         Self {
             secret,
@@ -54,23 +54,20 @@ fn hmac_sha1(key: &[u8], message: &[u8]) -> Vec<u8> {
     mac.finalize().into_bytes().to_vec()
 }
 
-/// Converts
-// TODO: use types to restrict this to exactly 20 bytes
+/// Converts hmac bytes to n digit number (determined by modulo length)
 fn truncate(bytes: &[u8], modulo: u32) -> u32 {
     let last_byte = bytes[19];
     let offset = (last_byte & 0xf) as usize;
-    // TODO: can't I do this with a vector??
     let offset_byte = (((bytes[offset] & 0x7f) as u32) << 24)
         | ((bytes[offset + 1] as u32) << 16)
         | ((bytes[offset + 2] as u32) << 8)
         | (bytes[offset + 3] as u32);
-    // TODO: make this const
     offset_byte % modulo
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{hmac_sha1, TOTP, truncate};
+    use crate::{hmac_sha1, truncate, TOTP};
 
     #[test]
     fn test_hmac_sha1() {
@@ -96,14 +93,5 @@ mod test {
         assert_eq!(totp.code_at(1234567890), 89005924);
         assert_eq!(totp.code_at(2000000000), 69279037);
         assert_eq!(totp.code_at(20000000000), 65353130);
-    }
-
-    #[test]
-    fn now() {
-        let key = hex::decode("C00673DD7583B1220A90").unwrap();
-        // let totp = TOTP::new(b"YADHHXLVQOYSECUQ", 1000_000, 30);
-        let totp = TOTP::new(&key, 1000_000, 30);
-        // totp.code();
-        dbg!(totp.code());
     }
 }
