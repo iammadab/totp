@@ -5,17 +5,20 @@ use std::time::{SystemTime, UNIX_EPOCH};
 type HmacSha1 = Hmac<Sha1>;
 
 struct TOTP<'a> {
+    /// Shared secret between the generator and validator
     secret: &'a [u8],
-    modulo: u32,
+    /// Specifies how many digits the generated code should be
+    digits: u32,
+    /// Determines the frequency of code generation in seconds
     time_step: u64,
 }
 
 impl<'a> TOTP<'a> {
     /// Initialize TOTP struct
-    fn new(secret: &'a [u8], modulo: u32, time_step: u64) -> Self {
+    fn new(secret: &'a [u8], digits: u32, time_step: u64) -> Self {
         Self {
             secret,
-            modulo,
+            digits,
             time_step,
         }
     }
@@ -43,7 +46,7 @@ impl<'a> TOTP<'a> {
     /// HOTP = truncate(hmac_sha1(K, C))
     /// where K is the secret and C is some seed value
     fn hotp(&self, seed: &[u8]) -> u32 {
-        truncate(&hmac_sha1(self.secret, seed), self.modulo)
+        truncate(&hmac_sha1(self.secret, seed), 10u32.pow(self.digits))
     }
 }
 
@@ -86,7 +89,7 @@ mod test {
 
     #[test]
     fn test_totp() {
-        let totp = TOTP::new(b"12345678901234567890", 10000_0000, 30);
+        let totp = TOTP::new(b"12345678901234567890", 8, 30);
         assert_eq!(totp.code_at(59), 94287082);
         assert_eq!(totp.code_at(1111111109), 07081804);
         assert_eq!(totp.code_at(1111111111), 14050471);
