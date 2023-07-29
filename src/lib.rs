@@ -56,7 +56,7 @@ fn hmac_sha1(key: &[u8], message: &[u8]) -> Vec<u8> {
 
 /// Converts hmac bytes to n digit number (determined by modulo length)
 fn truncate(bytes: &[u8], modulo: u32) -> u32 {
-    let last_byte = bytes[19];
+    let last_byte = bytes[bytes.len() - 1];
     let offset = (last_byte & 0xf) as usize;
     let offset_byte = (((bytes[offset] & 0x7f) as u32) << 24)
         | ((bytes[offset + 1] as u32) << 16)
