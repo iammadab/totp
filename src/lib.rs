@@ -24,13 +24,13 @@ impl<'a> TOTP<'a> {
     fn code(&self) -> u32 {
         let now = SystemTime::now();
         let since_epoch = now.duration_since(UNIX_EPOCH).unwrap();
-        let time_step_count = since_epoch.as_secs() / 30;
+        let time_step_count = since_epoch.as_secs() / self.time_step;
         self.totp(time_step_count)
     }
 
     /// Returns the code for the supplied time in seconds since UNIX_EPOCH
     fn code_at(&self, seconds: u64) -> u32 {
-        let time_step_count = seconds / 30;
+        let time_step_count = seconds / self.time_step;
         self.totp(time_step_count)
     }
 
