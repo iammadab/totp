@@ -89,6 +89,9 @@ mod test {
 
     #[test]
     fn test_totp() {
+        // TOTP test vectors
+        // See: https://datatracker.ietf.org/doc/html/rfc6238#appendix-B
+
         let totp = TOTP::new(b"12345678901234567890", 8, 30);
         assert_eq!(totp.code_at(59), 94287082);
         assert_eq!(totp.code_at(1111111109), 07081804);
